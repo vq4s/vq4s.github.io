@@ -1,5 +1,5 @@
 # Setup
-title: Dark Poole
+title: Vq4s
 url: https://getpoole.com
 paginate: 1
 baseurl: ""
@@ -32,9 +32,9 @@ sass:
 
 # Specify the author for blog posts
 author:
-  name: Mark Otto
-  url: https://twitter.com/mdo
-  email: markdotto@gmail.com
+  name: Łukasz Woźniak
+  url: https://vq4s.pl
+  #email: markdotto@gmail.com
 
 # Custom vars
 version: 3.0.0
