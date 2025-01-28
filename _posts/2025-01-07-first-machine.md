@@ -83,12 +83,7 @@ Finished
 
 ```
 ![html1](https://github.com/user-attachments/assets/b86efe03-1ec8-42d5-a461-81cf302f30ac)
-
-**Result:**
-
-
-- `/island/`
-
+![html2](https://github.com/user-attachments/assets/b805ba29-11a9-46a7-9687-5b5e6580bb7b)
 
 
 
@@ -121,15 +116,9 @@ Finished
 ===============================================================
 
 ```
+![html3](https://github.com/user-attachments/assets/8a7f94b8-2c04-43d6-acff-27d189f47454)
+![html4](https://github.com/user-attachments/assets/00650d4d-32bb-4016-8c80-2fabb3cd86ae)
 
-**Result:**
-- `/2100/`
-
-
-
-### **Gobuster na `/island/2100`**
-
-**Komenda:**
 ```bash
 ┌──(vq4s㉿kali)-[~/Downloads]
 └─$ gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -u 10.10.28.229/island/2100 -t 50 -x ticket
@@ -157,6 +146,7 @@ Finished
 ===============================================================
 
 ```
+![html5](https://github.com/user-attachments/assets/a38b3755-bd73-4a86-9e2a-d4219e14c4f6)
 
 
 ## **Base58 Decoding**
