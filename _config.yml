@@ -4,6 +4,8 @@ url: https://getpoole.com
 paginate: 1
 baseurl: ""
 permalink: pretty
+paginate: 5
+paginate_path: "/page:num/"
 
 
 
