@@ -1,7 +1,7 @@
 # Setup
 title: Vq4s
 url: https://getpoole.com
-paginate: false
+#paginate: false
 #paginate: 1
 baseurl: ""
 permalink: pretty
