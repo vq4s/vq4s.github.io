@@ -1,10 +1,11 @@
 # Setup
 title: Vq4s
 url: https://getpoole.com
-paginate: 1
+paginate: false
+#paginate: 1
 baseurl: ""
 permalink: pretty
-paginate: 5
+#paginate: 5
 paginate_path: "/page:num/"
 
 
@@ -48,5 +49,5 @@ nav:
   - title: Blog
     url: /archive
 
-  - title: About
+  - title: About me
     url: /about
