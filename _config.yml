@@ -1,5 +1,5 @@
 # Setup
-title: Vq4s
+title: Łukasz Woźniak
 url: https://getpoole.com
 #paginate: false
 paginate: 1
@@ -39,7 +39,7 @@ sass:
 author:
   name: Łukasz Woźniak
   url: https://vq4s.pl
-  #email: markdotto@gmail.com
+  email: lukasz@vq4s.pl
 
 # Custom vars
 version: 3.0.0
